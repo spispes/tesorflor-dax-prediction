@@ -17,7 +17,7 @@ training_set_close = getClose(dataset_train)
 # Feature Scaling
 from sklearn.preprocessing import MinMaxScaler
 sc = MinMaxScaler(feature_range = (0, 1))
-training_set_open_scaled = sc.fit_transform(training_set_open.reshape(-1,1))
+training_set_open_scaled = sc.fit_transform(training_set_close.reshape(-1,1))
 training_set_close_scaled = sc.fit_transform(training_set_close.reshape(-1,1))
 
 """
