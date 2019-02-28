@@ -10,7 +10,7 @@ from prepare_input import getOpen
 from prepare_input import getClose
 
 # Importing the training set
-dataset_train = prepareInput('GDAXI_train.csv')
+dataset_train = prepareInput('./daten/GDAXI_lerndaten.csv')
 training_set_open = getOpen(dataset_train)
 training_set_close = getClose(dataset_train)
 
@@ -28,7 +28,7 @@ training_set_close_scaled = sc.fit_transform(training_set_close.reshape(-1,1))
 """
 X_train_close = []
 y_train_close = []
-for i in range(60, 2280):
+for i in range(60, 7830):
     X_train_close.append(training_set_close_scaled[i-60:i, 0])
     y_train_close.append(training_set_close_scaled[i, 0])
 X_train_close, y_train_close = np.array(X_train_close), np.array(y_train_close)
@@ -82,7 +82,7 @@ regressor_close.fit(X_train_close, y_train_close, epochs = 100, batch_size = 32)
 
 """
 # Getting the real stock price of 2019
-dataset_predict = prepareInput('GDAXI_test.csv')
+dataset_predict = prepareInput('./daten/GDAXIto_be_predicted.csv')
 real_stock_price_close = getClose(dataset_predict)
 
 import pandas as pd
@@ -124,7 +124,7 @@ plt.plot(real_stock_price_close, color = 'red', label = 'Real DAX Stock Price')
 plt.plot(predicted_stock_price_close, color = 'blue', label = 'Predicted DAX Stock Close Price')
 plt.grid(b=None, which='major', axis='both')
 plt.title('DAX Stock Close Price Prediction')
-plt.xlabel('Time')
-plt.ylabel('DAX Stock Price')
+plt.inputlabel('Time')
+plt.outputlabel('DAX Stock Price')
 plt.legend()
 plt.show()

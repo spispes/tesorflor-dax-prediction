@@ -10,17 +10,19 @@ import pandas as pd
 """
 Read the given file to a dataset
 The first column is of date format. This will be set as index
-Then calculate the direction and add it as the last column
-This last step is for validation only
-The data is from yahoo. They add the Adj Close. This column is deleted.
+Delete empty rows
+Write modifiet set to disk
 """
 def prepareInput(filename):
     dataset_in = pd.read_csv(filename, sep= ',', index_col = 0)
-    # Delete Adj Close
-    dataset_in = dataset_in.drop(['Adj Close'], axis=1)
-    # Add reference for validation only      
-    dataset_in['direction'] = getDirection(dataset_in)     
+    dataset_in.shape
+    dataset_in = dataset_in.dropna()
+    dataset_in = dataset_in.drop(['Adj Close', 'Volume'], axis=1)
+    dataset_in.to_csv('./daten/filename_modified.csv')
+    
     return dataset_in
+
+# in_ = prepareInput('./daten/GDAXI_lerndaten.csv')
 
 """
 We are starting with a record (prepareInput) like
@@ -62,7 +64,8 @@ This will return the Data as index and
 the openings 
 """
 def getOpen(dataset):
-    openings = dataset.iloc[:, 0:1].values
+    openings = []
+    openings = dataset['Open'].copy()
     return openings
 
 """
@@ -70,10 +73,13 @@ This will return the Data as index and
 the close values 
 """
 def getClose(dataset):
-    close = dataset.iloc[:, 3:4].values
+    close = []
+    close = dataset['Close'].copy()
     return close
 
 # Test only 
-in_ = prepareInput('GDAXI.csv')
-open = getOpen(in_)
-close = getClose(in_)
+"""
+    in_ = prepareInput('./daten/GDAXI_lerndaten.csv')
+    open = getOpen(in_)
+    close = getClose(in_)
+"""
