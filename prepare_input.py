@@ -18,8 +18,7 @@ def prepareInput(filename):
     dataset_in.shape
     dataset_in = dataset_in.dropna()
     dataset_in = dataset_in.drop(['Adj Close', 'Volume'], axis=1)
-    dataset_in.to_csv('./daten/filename_modified.csv')
-    
+    dataset_in.to_csv(filename+'_modified.csv')    
     return dataset_in
 
 # in_ = prepareInput('./daten/GDAXI_lerndaten.csv')

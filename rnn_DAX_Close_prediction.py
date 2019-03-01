@@ -75,6 +75,13 @@ regressor_close.compile(optimizer = 'adam', loss = 'mean_squared_error')
 regressor_close.fit(X_train_close, y_train_close, epochs = 100, batch_size = 32)
 
 """
+persist Model
+"""
+    regressor_json = regressor_close.to_json()
+    with open("regressor.json", "w") as json_file:
+        json_file.write(regressor_json)
+    regressor_close.save_weights("regressor.h5")
+"""
 
  Making the predictions and visualising the results
  the prediction is based on this years values only
