@@ -31,7 +31,7 @@ def train(filename, inputColumn, outputColumn):
     regressor.add(Dropout(0.2))
     regressor.add(Dense(units = 1))
     regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
-    regressor.fit(model, reference, epochs = 10, batch_size = 32)   
+    regressor.fit(model, reference, epochs = 100, batch_size = 32)   
     regressor_json = regressor.to_json()
     with open("regressor.json", "w") as json_file:
         json_file.write(regressor_json)
