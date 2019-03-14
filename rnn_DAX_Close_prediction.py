@@ -28,7 +28,7 @@ training_set_close_scaled = sc.fit_transform(training_set_close.reshape(-1,1))
 """
 X_train_close = []
 y_train_close = []
-for i in range(60, 7830):
+for i in range(60, 1011):
     X_train_close.append(training_set_close_scaled[i-60:i, 0])
     y_train_close.append(training_set_close_scaled[i, 0])
 X_train_close, y_train_close = np.array(X_train_close), np.array(y_train_close)
@@ -72,15 +72,15 @@ regressor_close.add(Dense(units = 1))
 regressor_close.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 # Fitting the RNN to the Training set
-regressor_close.fit(X_train_close, y_train_close, epochs = 100, batch_size = 32)
+regressor_close.fit(X_train_close, y_train_close, epochs = 200, batch_size = 32)
 
 """
 persist Model
 """
-    regressor_json = regressor_close.to_json()
-    with open("regressor.json", "w") as json_file:
-        json_file.write(regressor_json)
-    regressor_close.save_weights("regressor.h5")
+regressor_json = regressor_close.to_json()
+with open("regressor.json", "w") as json_file:
+    json_file.write(regressor_json)
+regressor_close.save_weights("regressor_.h5")
 """
 
  Making the predictions and visualising the results
