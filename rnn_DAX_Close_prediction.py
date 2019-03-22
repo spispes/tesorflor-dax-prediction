@@ -26,12 +26,15 @@ training_set_close_scaled = sc.fit_transform(training_set_close.reshape(-1,1))
  which is the first date to the date before the to be predicted day )
  predicting the next days (position 60) open
 """
+maxLen = len(dataset_train)
 X_train_close = []
+X_train_open = []
 y_train_close = []
-for i in range(60, 1011):
+for i in range(60, maxLen):
     X_train_close.append(training_set_close_scaled[i-60:i, 0])
     y_train_close.append(training_set_close_scaled[i, 0])
 X_train_close, y_train_close = np.array(X_train_close), np.array(y_train_close)
+
 
 """ 
 Reshaping adding a secon dimention to the network
@@ -40,6 +43,7 @@ number of data sets = X_train_close.shape[0]
 number of colums = X_train_close.shape[1] //60 in this case
 """
 X_train_close = np.reshape(X_train_close, (X_train_close.shape[0], X_train_close.shape[1], 1))
+
 
 from keras.models import Sequential
 from keras.layers import Dense
@@ -72,7 +76,7 @@ regressor_close.add(Dense(units = 1))
 regressor_close.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 # Fitting the RNN to the Training set
-regressor_close.fit(X_train_close, y_train_close, epochs = 200, batch_size = 32)
+regressor_close.fit(X_train_close, y_train_close, epochs = 100, batch_size = 32)
 
 """
 persist Model
@@ -119,7 +123,7 @@ X_predict_close = []
 for i in range(60, maxLen):
     X_predict_close.append(inputs[i-60:i, 0])
 X_predict_close = np.array(X_predict_close)
-X_predict_close = np.reshape(X_predict_close, (X_predict_close.shape[0], X_predict_close.shape[1], 1))
+X_predict_close = np.reshape(X_predict_close, (X_predict_close.shape[0], 1))
 
 predicted_stock_price_close = regressor_close.predict(X_predict_close)
 predicted_stock_price_close = sc.inverse_transform(predicted_stock_price_close)
@@ -127,11 +131,11 @@ predicted_stock_price_close = sc.inverse_transform(predicted_stock_price_close)
 
 # Visualising the results
 plt.plot(real_stock_price_close, color = 'red', label = 'Real DAX Stock Price')
-
 plt.plot(predicted_stock_price_close, color = 'blue', label = 'Predicted DAX Stock Close Price')
-plt.grid(b=None, which='major', axis='both')
+plt.grid(True)
 plt.title('DAX Stock Close Price Prediction')
-plt.inputlabel('Time')
-plt.outputlabel('DAX Stock Price')
-plt.legend()
+#plt.inputlabel('Time')
+#plt.outputlabel('DAX Stock Price')
+#plt.legend()
+#plt.tight_layout()
 plt.show()
