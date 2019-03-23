@@ -28,13 +28,11 @@ training_set_close_scaled = sc.fit_transform(training_set_close.reshape(-1,1))
 """
 maxLen = len(dataset_train)
 X_train_close = []
-X_train_open = []
 y_train_close = []
 for i in range(60, maxLen):
     X_train_close.append(training_set_close_scaled[i-60:i, 0])
     y_train_close.append(training_set_close_scaled[i, 0])
 X_train_close, y_train_close = np.array(X_train_close), np.array(y_train_close)
-
 
 """ 
 Reshaping adding a secon dimention to the network
@@ -43,7 +41,6 @@ number of data sets = X_train_close.shape[0]
 number of colums = X_train_close.shape[1] //60 in this case
 """
 X_train_close = np.reshape(X_train_close, (X_train_close.shape[0], X_train_close.shape[1], 1))
-
 
 from keras.models import Sequential
 from keras.layers import Dense
@@ -76,7 +73,8 @@ regressor_close.add(Dense(units = 1))
 regressor_close.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 # Fitting the RNN to the Training set
-regressor_close.fit(X_train_close, y_train_close, epochs = 100, batch_size = 32)
+regressor_close.fit(X_train_close, y_train_close, epochs = 2, batch_size = 32)
+
 
 """
 persist Model
@@ -84,13 +82,11 @@ persist Model
 regressor_json = regressor_close.to_json()
 with open("regressor.json", "w") as json_file:
     json_file.write(regressor_json)
-regressor_close.save_weights("regressor_.h5")
+regressor_close.save_weights("regressor.h5")
 """
-
  Making the predictions and visualising the results
  the prediction is based on this years values only
  The prediction is compared to the real values included in GDAXI_test.csv
-
 """
 # Getting the real stock price of 2019
 dataset_predict = prepareInput('./daten/GDAXIto_be_predicted.csv')
@@ -123,7 +119,7 @@ X_predict_close = []
 for i in range(60, maxLen):
     X_predict_close.append(inputs[i-60:i, 0])
 X_predict_close = np.array(X_predict_close)
-X_predict_close = np.reshape(X_predict_close, (X_predict_close.shape[0], 1))
+X_predict_close = np.reshape(X_predict_close, (X_predict_close.shape[0], X_predict_close.shape[1], 1))
 
 predicted_stock_price_close = regressor_close.predict(X_predict_close)
 predicted_stock_price_close = sc.inverse_transform(predicted_stock_price_close)
@@ -131,11 +127,10 @@ predicted_stock_price_close = sc.inverse_transform(predicted_stock_price_close)
 
 # Visualising the results
 plt.plot(real_stock_price_close, color = 'red', label = 'Real DAX Stock Price')
+
 plt.plot(predicted_stock_price_close, color = 'blue', label = 'Predicted DAX Stock Close Price')
-plt.grid(True)
+plt.grid(b=None, which='major', axis='both')
 plt.title('DAX Stock Close Price Prediction')
-#plt.inputlabel('Time')
-#plt.outputlabel('DAX Stock Price')
-#plt.legend()
-#plt.tight_layout()
+plt.outputlabel('DAX Stock Price')
+plt.legend()
 plt.show()
