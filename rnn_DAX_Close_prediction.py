@@ -75,7 +75,6 @@ regressor_close.compile(optimizer = 'adam', loss = 'mean_squared_error')
 # Fitting the RNN to the Training set
 regressor_close.fit(X_train_close, y_train_close, epochs = 100, batch_size = 32)
 
-
 """
 persist Model
 """
