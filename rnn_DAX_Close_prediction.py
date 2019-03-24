@@ -62,6 +62,10 @@ regressor_close.add(Dropout(0.2))
 regressor_close.add(LSTM(units = 50, return_sequences = True))
 regressor_close.add(Dropout(0.2))
 
+# Adding a third LSTM layer and some Dropout regularisation
+regressor_close.add(LSTM(units = 50, return_sequences = True))
+regressor_close.add(Dropout(0.2))
+
 # Adding a fourth LSTM layer and some Dropout regularisation
 regressor_close.add(LSTM(units = 50))
 regressor_close.add(Dropout(0.2))
@@ -73,7 +77,7 @@ regressor_close.add(Dense(units = 1))
 regressor_close.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 # Fitting the RNN to the Training set
-regressor_close.fit(X_train_close, y_train_close, epochs = 100, batch_size = 32)
+regressor_close.fit(X_train_close, y_train_close, epochs = 200, batch_size = 32)
 
 """
 persist Model
@@ -130,6 +134,5 @@ plt.plot(real_stock_price_close, color = 'red', label = 'Real DAX Stock Price')
 plt.plot(predicted_stock_price_close, color = 'blue', label = 'Predicted DAX Stock Close Price')
 plt.grid(b=None, which='major', axis='both')
 plt.title('DAX Stock Close Price Prediction')
-plt.outputlabel('DAX Stock Price')
 plt.legend()
 plt.show()
