@@ -51,23 +51,23 @@ from keras.layers import Dropout
 regressor_close = Sequential()
 
 # Adding the first LSTM layer and some Dropout regularisation
-regressor_close.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train_close.shape[1], 1)))
+regressor_close.add(LSTM(units = 60, return_sequences = True, input_shape = (X_train_close.shape[1], 1)))
 regressor_close.add(Dropout(0.2))
 
 # Adding a second LSTM layer and some Dropout regularisation
-regressor_close.add(LSTM(units = 50, return_sequences = True))
+regressor_close.add(LSTM(units = 60, return_sequences = True))
 regressor_close.add(Dropout(0.2))
 
 # Adding a third LSTM layer and some Dropout regularisation
-regressor_close.add(LSTM(units = 50, return_sequences = True))
+regressor_close.add(LSTM(units = 60, return_sequences = True))
 regressor_close.add(Dropout(0.2))
 
 # Adding a third LSTM layer and some Dropout regularisation
-regressor_close.add(LSTM(units = 50, return_sequences = True))
+regressor_close.add(LSTM(units = 60, return_sequences = True))
 regressor_close.add(Dropout(0.2))
 
 # Adding a fourth LSTM layer and some Dropout regularisation
-regressor_close.add(LSTM(units = 50))
+regressor_close.add(LSTM(units = 60))
 regressor_close.add(Dropout(0.2))
 
 # Adding the output layer
@@ -77,7 +77,7 @@ regressor_close.add(Dense(units = 1))
 regressor_close.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 # Fitting the RNN to the Training set
-regressor_close.fit(X_train_close, y_train_close, epochs = 180, batch_size = 32)
+regressor_close.fit(X_train_close, y_train_close, epochs = 160, batch_size = 32)
 
 """
 persist Model
@@ -136,3 +136,14 @@ plt.grid(b=None, which='major', axis='both')
 plt.title('DAX Stock Close Price Prediction')
 plt.legend()
 plt.show()
+
+"""
+Lade Modell
+
+json_file = open('good_regressor.json', 'r')
+loaded_model_json = json_file.read()
+json_file.close()
+regressor_close = regressor_close(loaded_model_json)
+# load weights into new model
+regressor_close.load_weights("good_regressor.h5")
+"""
