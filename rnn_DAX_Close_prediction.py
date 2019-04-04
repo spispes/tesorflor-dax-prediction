@@ -77,21 +77,28 @@ regressor_close.add(Dense(units = 1))
 regressor_close.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 # Fitting the RNN to the Training set
-regressor_close.fit(X_train_close, y_train_close, epochs = 160, batch_size = 32)
+# regressor_close.fit(X_train_close, y_train_close, epochs = 150, batch_size = 32)
 
 """
 persist Model
 """
-regressor_json = regressor_close.to_json()
-with open("regressor.json", "w") as json_file:
-    json_file.write(regressor_json)
-regressor_close.save_weights("regressor.h5")
+#regressor_json = regressor_close.to_json()
+#with open("regressor.json", "w") as json_file:
+#    json_file.write(regressor_json)
+#regressor_close.save_weights("regressor.h5")
 """
  Making the predictions and visualising the results
  the prediction is based on this years values only
  The prediction is compared to the real values included in GDAXI_test.csv
 """
 # Getting the real stock price of 2019
+
+from keras.models import model_from_json
+
+with open('top_regressor.json', 'r') as f:
+    regressor_close = model_from_json(f.read())
+regressor_close.load_weights('top_regressor.h5')
+
 dataset_predict = prepareInput('./daten/GDAXIto_be_predicted.csv')
 real_stock_price_close = getClose(dataset_predict)
 
@@ -139,11 +146,15 @@ plt.show()
 
 """
 Lade Modell
+regressor_json = regressor_close.to_json()
+with open("regressor.json", "w") as json_file:
+    json_file.write(regressor_json)
+regressor_close.save_weights("regressor.h5")
 
-json_file = open('good_regressor.json', 'r')
-loaded_model_json = json_file.read()
-json_file.close()
-regressor_close = regressor_close(loaded_model_json)
-# load weights into new model
-regressor_close.load_weights("good_regressor.h5")
+
+from keras.models import model_from_json
+
+with open('top_regressor.json', 'r') as f:
+    regressor_close = model_from_json(f.read())
+regressor_close.load_weights('top_regressor.h5')
 """
