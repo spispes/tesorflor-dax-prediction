@@ -95,9 +95,9 @@ persist Model
 
 from keras.models import model_from_json
 
-with open('top_regressor.json', 'r') as f:
+with open('dax_regressor.json', 'r') as f:
     regressor_close = model_from_json(f.read())
-regressor_close.load_weights('top_regressor.h5')
+regressor_close.load_weights('dax_regressor.h5')
 
 dataset_predict = prepareInput('./daten/GDAXIto_be_predicted.csv')
 real_stock_price_close = getClose(dataset_predict)
@@ -137,7 +137,6 @@ predicted_stock_price_close = sc.inverse_transform(predicted_stock_price_close)
 
 # Visualising the results
 plt.plot(real_stock_price_close, color = 'red', label = 'Real DAX Stock Price')
-
 plt.plot(predicted_stock_price_close, color = 'blue', label = 'Predicted DAX Stock Close Price')
 plt.grid(b=None, which='major', axis='both')
 plt.title('DAX Stock Close Price Prediction')
