@@ -9,6 +9,7 @@ import numpy as np
 
 
 def train(filename, inputColumn, outputColumn):
+    from sklearn.model_selection import GridSearchCV
     from keras.models import Sequential
     from keras.layers import Dense
     from keras.layers import LSTM
@@ -17,30 +18,39 @@ def train(filename, inputColumn, outputColumn):
     trainSet = prepareInput(filename)    
     model = createModel(trainSet, inputColumn, )
     reference = getReference(trainSet, outputColumn)
+    # Initialising the RNN
     regressor = Sequential()
-    regressor.add(LSTM(units = 70, 
+    regressor.add(LSTM(units = 60, 
                              return_sequences = True, 
                              input_shape = (model.shape[1], 1)))
-    regressor.add(Dropout(0.3))
-    regressor.add(LSTM(units = 70, return_sequences = True))
-    regressor.add(Dropout(0.3))
-    regressor.add(LSTM(units = 70, return_sequences = True))
-    regressor.add(Dropout(0.3))
-    regressor.add(LSTM(units = 70, return_sequences = True))
-    regressor.add(Dropout(0.3))
-    regressor.add(LSTM(units = 70))
-    regressor.add(Dropout(0.3))
+    regressor.add(Dropout(0.25))
+    regressor.add(LSTM(units = 60, return_sequences = True))
+    regressor.add(Dropout(0.25))
+    regressor.add(LSTM(units = 60, return_sequences = True))
+    regressor.add(Dropout(0.25))
+    regressor.add(LSTM(units = 60))
+    regressor.add(Dropout(0.25))
     regressor.add(Dense(units = 1))
-    regressor.compile(optimizer = 'rmsprop', loss = 'mean_squared_logarithmic_error')
-    regressor.fit(model, reference, epochs = 150, batch_size = 32)   
+    #regressor.compile(optimizer = 'adam', loss = 'mean_squared_error', metrics = {'output_a': 'accuracy'})
+    #regressor.fit(model, reference, epochs = 100, batch_size = 32)
+    parameters = {'batch_size': [25, 32, 47],
+                  'nb_epoch': [2,5,7],
+                  'optimizer': ['adam', 'rmsprop']}
+    grid_search = GridSearchCV(estimator = regressor,
+                               param_grid = parameters,
+                               scoring= 'accuracy',
+                               cv = 10)
+    grid_search = grid_search.fit(model, reference)
+    best_parameters = grid_search.best_params_
+    best_accuracy = grid_search.best_score_
     persistModel(regressor)
     
     
 def persistModel(regressor): 
     regressor_json = regressor.to_json()
-    with open("regressors/test_dax_regressor.json", "w") as json_file:
+    with open("regressors/test_regressor.json", "w") as json_file:
         json_file.write(regressor_json)
-    regressor.save_weights("regressors/test_dax_regressor.h5")
+    regressor.save_weights("regressors/test_regressor.h5")
 
 
 def createModel(trainSet, inputColumn):
@@ -71,5 +81,8 @@ def scale(unscaledSet):
     scaledSet = sc.fit_transform(unscaledSet.reshape(-1,1))
     return scaledSet
 
-
+from prepare_input import prepareInput
+trainSet = prepareInput('./daten/GDAXI_lerndaten.csv') 
+myModel = createModel(trainSet, 'Close')
+reference = getReference(trainSet, 'Open')
 train('./daten/GDAXI_lerndaten.csv', 'Close', 'Close')

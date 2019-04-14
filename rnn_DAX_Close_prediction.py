@@ -4,10 +4,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+from sklearn.preprocessing import MinMaxScaler
 from prepare_input import prepareInput
 from prepare_input import getOpen
 from prepare_input import getClose
+from loadRegresor import load_regressor
 
 # Importing the training set
 dataset_train = prepareInput('./daten/GDAXI_lerndaten.csv')
@@ -15,7 +16,7 @@ training_set_open = getOpen(dataset_train)
 training_set_close = getClose(dataset_train)
 
 # Feature Scaling
-from sklearn.preprocessing import MinMaxScaler
+
 sc = MinMaxScaler(feature_range = (0, 1))
 training_set_open_scaled = sc.fit_transform(training_set_open.reshape(-1,1))
 training_set_close_scaled = sc.fit_transform(training_set_close.reshape(-1,1))
@@ -42,62 +43,7 @@ number of colums = X_train_close.shape[1] //60 in this case
 """
 X_train_close = np.reshape(X_train_close, (X_train_close.shape[0], X_train_close.shape[1], 1))
 
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import LSTM
-from keras.layers import Dropout
-
-# Initialising the RNN
-regressor_close = Sequential()
-
-# Adding the first LSTM layer and some Dropout regularisation
-regressor_close.add(LSTM(units = 60, return_sequences = True, input_shape = (X_train_close.shape[1], 1)))
-regressor_close.add(Dropout(0.2))
-
-# Adding a second LSTM layer and some Dropout regularisation
-regressor_close.add(LSTM(units = 60, return_sequences = True))
-regressor_close.add(Dropout(0.2))
-
-# Adding a third LSTM layer and some Dropout regularisation
-regressor_close.add(LSTM(units = 60, return_sequences = True))
-regressor_close.add(Dropout(0.2))
-
-# Adding a third LSTM layer and some Dropout regularisation
-regressor_close.add(LSTM(units = 60, return_sequences = True))
-regressor_close.add(Dropout(0.2))
-
-# Adding a fourth LSTM layer and some Dropout regularisation
-regressor_close.add(LSTM(units = 60))
-regressor_close.add(Dropout(0.2))
-
-# Adding the output layer
-regressor_close.add(Dense(units = 1))
-
-# Compiling the RNN
-regressor_close.compile(optimizer = 'adam', loss = 'mean_squared_error')
-
-# Fitting the RNN to the Training set
-# regressor_close.fit(X_train_close, y_train_close, epochs = 150, batch_size = 32)
-
-"""
-persist Model
-"""
-#regressor_json = regressor_close.to_json()
-#with open("regressor.json", "w") as json_file:
-#    json_file.write(regressor_json)
-#regressor_close.save_weights("regressor.h5")
-"""
- Making the predictions and visualising the results
- the prediction is based on this years values only
- The prediction is compared to the real values included in GDAXI_test.csv
-"""
-# Getting the real stock price of 2019
-
-from keras.models import model_from_json
-
-with open('dax_regressor.json', 'r') as f:
-    regressor_close = model_from_json(f.read())
-regressor_close.load_weights('dax_regressor.h5')
+regressor_close = load_regressor('test_dax_regressor')
 
 dataset_predict = prepareInput('./daten/GDAXIto_be_predicted.csv')
 real_stock_price_close = getClose(dataset_predict)
@@ -142,18 +88,3 @@ plt.grid(b=None, which='major', axis='both')
 plt.title('DAX Stock Close Price Prediction')
 plt.legend()
 plt.show()
-
-"""
-Lade Modell
-regressor_json = regressor_close.to_json()
-with open("regressor.json", "w") as json_file:
-    json_file.write(regressor_json)
-regressor_close.save_weights("regressor.h5")
-
-
-from keras.models import model_from_json
-
-with open('top_regressor.json', 'r') as f:
-    regressor_close = model_from_json(f.read())
-regressor_close.load_weights('top_regressor.h5')
-"""
