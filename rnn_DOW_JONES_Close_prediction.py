@@ -47,7 +47,7 @@ X_train_close = np.reshape(X_train_close, (X_train_close.shape[0], X_train_close
 
 
 # Initialising the RNN
-regressor_close = load_regressor('test_dax_regressor')
+regressor_close = load_regressor('dax_regressor')
 
 
 dataset_predict = prepareInput('./daten/DOW_JONES_to_be_predicted.csv')

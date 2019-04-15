@@ -31,16 +31,16 @@ def train(filename, inputColumn, outputColumn):
     regressor.add(LSTM(units = 70))
     regressor.add(Dropout(0.3))
     regressor.add(Dense(units = 1))
-    regressor.compile(optimizer = 'rmsprop', loss = 'mean_squared_logarithmic_error')
+    regressor.compile(optimizer = 'rmsprop', loss = 'mean_squared_error')
     regressor.fit(model, reference, epochs = 150, batch_size = 32)   
     persistModel(regressor)
     
     
 def persistModel(regressor): 
     regressor_json = regressor.to_json()
-    with open("regressors/test_dax_regressor.json", "w") as json_file:
+    with open("regressors/test_djones_regressor.json", "w") as json_file:
         json_file.write(regressor_json)
-    regressor.save_weights("regressors/test_dax_regressor.h5")
+    regressor.save_weights("regressors/test_djones_regressor.h5")
 
 
 def createModel(trainSet, inputColumn):
@@ -72,4 +72,4 @@ def scale(unscaledSet):
     return scaledSet
 
 
-train('./daten/GDAXI_lerndaten.csv', 'Close', 'Close')
+train('./daten/DOW_JONES_lerndaten.csv', 'Close', 'Close')

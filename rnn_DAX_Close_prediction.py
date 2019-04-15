@@ -43,7 +43,7 @@ number of colums = X_train_close.shape[1] //60 in this case
 """
 X_train_close = np.reshape(X_train_close, (X_train_close.shape[0], X_train_close.shape[1], 1))
 
-regressor_close = load_regressor('test_dax_regressor')
+regressor_close = load_regressor('dax_regressor')
 
 dataset_predict = prepareInput('./daten/GDAXIto_be_predicted.csv')
 real_stock_price_close = getClose(dataset_predict)
