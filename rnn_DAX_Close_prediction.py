@@ -6,19 +6,19 @@ import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import MinMaxScaler
 from prepare_input import prepareInput
-from prepare_input import getOpen
+#from prepare_input import getOpen
 from prepare_input import getClose
 from loadRegresor import load_regressor
 
 # Importing the training set
 dataset_train = prepareInput('./daten/GDAXI_lerndaten.csv')
-training_set_open = getOpen(dataset_train)
+#training_set_open = getOpen(dataset_train)
 training_set_close = getClose(dataset_train)
 
 # Feature Scaling
 
 sc = MinMaxScaler(feature_range = (0, 1))
-training_set_open_scaled = sc.fit_transform(training_set_open.reshape(-1,1))
+#training_set_open_scaled = sc.fit_transform(training_set_open.reshape(-1,1))
 training_set_close_scaled = sc.fit_transform(training_set_close.reshape(-1,1))
 
 """
@@ -27,6 +27,8 @@ training_set_close_scaled = sc.fit_transform(training_set_close.reshape(-1,1))
  which is the first date to the date before the to be predicted day )
  predicting the next days (position 60) open
 """
+
+"""
 maxLen = len(dataset_train)
 X_train_close = []
 y_train_close = []
@@ -34,18 +36,20 @@ for i in range(60, maxLen):
     X_train_close.append(training_set_close_scaled[i-60:i, 0])
     y_train_close.append(training_set_close_scaled[i, 0])
 X_train_close, y_train_close = np.array(X_train_close), np.array(y_train_close)
-
+"""
 """ 
 Reshaping adding a secon dimention to the network
 Impup is X_train_close the prepared matrix and the connection is to
 number of data sets = X_train_close.shape[0]
 number of colums = X_train_close.shape[1] //60 in this case
 """
-X_train_close = np.reshape(X_train_close, (X_train_close.shape[0], X_train_close.shape[1], 1))
+#X_train_close = np.reshape(X_train_close, (X_train_close.shape[0], X_train_close.shape[1], 1))
+
+
 
 regressor_close = load_regressor('dax_regressor')
 
-dataset_predict = prepareInput('./daten/GDAXIto_be_predicted.csv')
+dataset_predict = prepareInput('./daten/GDAXI_to_be_predicted.csv')
 real_stock_price_close = getClose(dataset_predict)
 
 import pandas as pd

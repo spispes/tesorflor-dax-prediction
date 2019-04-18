@@ -7,7 +7,7 @@ import pandas as pd
 
 from sklearn.preprocessing import MinMaxScaler
 from prepare_input import prepareInput
-#from prepare_input import getOpen
+from prepare_input import getOpen
 from prepare_input import getClose
 from loadRegresor import load_regressor
 
@@ -17,7 +17,9 @@ dataset_train = prepareInput('./daten/DOW_JONES_lerndaten.csv')
 training_set_close = getClose(dataset_train)
 
 # Feature Scaling
-
+sc = MinMaxScaler(feature_range = (0, 1))
+training_set_open = getOpen(dataset_train)
+training_set_open = sc.fit_transform(training_set_open.reshape(-1,1))
 #sc = MinMaxScaler(feature_range = (0, 1))
 #training_set_open_scaled = sc.fit_transform(training_set_open.reshape(-1,1))
 #training_set_close_scaled = sc.fit_transform(training_set_close.reshape(-1,1))
@@ -63,9 +65,9 @@ The last item in the list is the prediction for the next day
 The last step in input preparation is to normalize the input range 0:1
 """
 
-sc = MinMaxScaler(feature_range = (0, 1))
+
 inputs = dataset_total_close[len(dataset_total_close) - len(dataset_predict) - 60:].values
-inputs = sc.fit_transform(inputs.reshape(-1,1))
+inputs = sc.transform(inputs.reshape(-1,1))
 #inputs = sc.transform(inputs)
 """
 Prepare a prediction set where for each entry in dataset_predict
