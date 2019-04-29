@@ -67,7 +67,7 @@ The last step in input preparation is to normalize the input range 0:1
 
 
 inputs = dataset_total_close[len(dataset_total_close) - len(dataset_predict) - 60:].values
-inputs = sc.transform(inputs.reshape(-1,1))
+inputs = sc.fit_transform(inputs.reshape(-1,1))
 #inputs = sc.transform(inputs)
 """
 Prepare a prediction set where for each entry in dataset_predict

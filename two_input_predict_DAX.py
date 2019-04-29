@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Apr 27 13:48:37 2019
+
+@author: peter
+"""
+
 # Data Preprocessing
 
 import numpy as np
@@ -6,20 +13,19 @@ import pandas as pd
 
 from sklearn.preprocessing import MinMaxScaler
 from prepare_input import prepareInput
-from prepare_input import getClose, getOpen
+from prepare_input import getClose
 from loadRegresor import load_regressor
 
 
-dataset = prepareInput('./daten/offset_2013.csv')
+dataset = prepareInput('./daten/offset_2016.csv')
 dataset_predict = prepareInput('./daten/predict.csv')
+firstDataset_total = pd.concat((dataset['Open'], dataset_predict['Open']), axis = 0)
+secondDataset_total = pd.concat((dataset['Close'], dataset_predict['Close']), axis = 0)
 
-dataset_total_close = pd.concat((dataset['Close'], dataset_predict['Close']), axis = 0)
+regressor_close = load_regressor('two_input_2019-04-28_21-44-00_dax_regressor')
 
-#regressor_close = load_regressor('dax_2_regressor')
-regressor_close = load_regressor('dax_regressor')
-
-sc = MinMaxScaler(feature_range = (0, 1), copy = False)
-training_set_open = getOpen(dataset)
+sc = MinMaxScaler(feature_range = (0, 1))
+training_set_open = getClose(dataset)
 training_set_open = sc.fit_transform(training_set_open.reshape(-1,1))
 
 """
@@ -30,9 +36,12 @@ The last step in input preparation is to normalize the input range 0:1
 """
 timestamp = 60
 
-inputs = dataset_total_close[len(dataset_total_close) - len(dataset_predict) - timestamp:].values
-#inputs = sc.fit_transform(inputs.reshape(-1,1))
-inputs = sc.transform(inputs.reshape(-1,1))
+firstInputs = firstDataset_total[len(firstDataset_total) - len(dataset_predict) - timestamp:].values
+secondInputs = secondDataset_total[len(secondDataset_total) - len(dataset_predict) - timestamp:].values
+
+firstInputs = sc.transform(firstInputs.reshape(-1,1))
+secondInputs = sc.transform(secondInputs.reshape(-1,1))
+overalInputs = np.column_stack((firstInputs,secondInputs))
 
 """
 Prepare a prediction set where for each entry in dataset_predict
@@ -44,14 +53,17 @@ the last 60 days are added e.g.
 [close day max, close day -1, close day -2, ..., close day max - 60 ]
 """
 # len + 1 is the last predicted day but there are no close values for this 
-maxLen = len(inputs) +1
-X_predict_close = []
-for i in range(timestamp, maxLen):
-    X_predict_close.append(inputs[i-timestamp:i, 0])
-X_predict_close = np.array(X_predict_close)
-X_predict_close = np.reshape(X_predict_close, (X_predict_close.shape[0], X_predict_close.shape[1], 1))
+maxLen = len(overalInputs) +1
+X_1 = []
 
-predicted_stock_price_close = regressor_close.predict(X_predict_close)
+for i in range(timestamp, maxLen):
+    X_1.append(overalInputs[i-timestamp:i, :])
+
+X_1 = np.array(X_1)
+
+X_predict = np.reshape(X_1, (X_1.shape[0], X_1.shape[1], 2))
+
+predicted_stock_price_close = regressor_close.predict(X_predict)
 predicted_stock_price_close = sc.inverse_transform(predicted_stock_price_close)
 
 real_stock_price_close = getClose(dataset_predict)
