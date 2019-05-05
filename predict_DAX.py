@@ -15,11 +15,11 @@ dataset_predict = prepareInput('./daten/predict.csv')
 
 dataset_total_close = pd.concat((dataset['Close'], dataset_predict['Close']), axis = 0)
 
-#regressor_close = load_regressor('dax_2_regressor')
 regressor_close = load_regressor('dax_regressor')
+#regressor_close = load_regressor('dax_regressor')
 
 sc = MinMaxScaler(feature_range = (0, 1), copy = False)
-training_set_open = getOpen(dataset)
+training_set_open = getClose(dataset)
 training_set_open = sc.fit_transform(training_set_open.reshape(-1,1))
 
 """

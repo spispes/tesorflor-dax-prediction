@@ -17,16 +17,19 @@ from prepare_input import getClose
 from loadRegresor import load_regressor
 
 
-dataset = prepareInput('./daten/offset_2016.csv')
-dataset_predict = prepareInput('./daten/predict.csv')
+dataset = prepareInput('./daten/offset.csv')
+dataset_predict = prepareInput('./daten/predict_long.csv')
 firstDataset_total = pd.concat((dataset['Open'], dataset_predict['Open']), axis = 0)
 secondDataset_total = pd.concat((dataset['Close'], dataset_predict['Close']), axis = 0)
 
-regressor_close = load_regressor('two_input_2019-04-28_21-44-00_dax_regressor')
+regressor_close = load_regressor('two_input_2019-04-29_22-13-58_dax_regressor')
 
+"""
+Not used for prediction just used to prepare scaler
+"""
 sc = MinMaxScaler(feature_range = (0, 1))
 training_set_open = getClose(dataset)
-training_set_open = sc.fit_transform(training_set_open.reshape(-1,1))
+sc.fit(training_set_open.reshape(-1,1))
 
 """
 input are the days to be predicted + 60 days from the past

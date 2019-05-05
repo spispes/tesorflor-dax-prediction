@@ -23,13 +23,15 @@ def train(filename, inputColumn, outputColumn):
     regressor.add(Dropout(0.2))
     regressor.add(LSTM(units = 60, return_sequences = True))
     regressor.add(Dropout(0.2))
+    regressor.add(LSTM(units = 60, return_sequences = True))
+    regressor.add(Dropout(0.2))
     regressor.add(LSTM(units = 60))
     regressor.add(Dropout(0.2))
     regressor.add(Dense(units = 1))
     # test_2019-04-18_07-14-07_dji_regressor schlecht regressor.compile(optimizer = 'rmsprop', loss = 'mean_squared_logarithmic_error')
     # test_2019-04-18_07-51-17_dji_regressor schlecht regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
-    regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
-    regressor.fit(model, reference, epochs = 300, batch_size = 32)
+    regressor.compile(optimizer = 'rmsprop', loss = 'mean_squared_error')
+    regressor.fit(model, reference, epochs = 200, batch_size = 32)
     persistModel(regressor)
     
     
@@ -39,9 +41,9 @@ def persistModel(regressor):
     regressor_json = regressor.to_json()
     ts = time.time()
     st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H-%M-%S')
-    with open("regressors/test_"+st+"_ftse_regressor.json", "w") as json_file:
+    with open("regressors/test_"+st+"_dax_regressor.json", "w") as json_file:
         json_file.write(regressor_json)
-    regressor.save_weights("regressors/test_"+st+"_ftse_regressor.h5")
+    regressor.save_weights("regressors/test_"+st+"_dax_regressor.h5")
 
 
 def createModel(trainSet, inputColumn):
@@ -56,7 +58,8 @@ def createModel(trainSet, inputColumn):
     return X_train
 
 def getReference(trainSet, outputColumn):
-    outputSet = scale(trainSet[outputColumn].copy())
+    outputSet = trainSet[outputColumn].copy()
+    outputSet = scale(outputSet)
     trainingItems = len(trainSet)
     timestamps = 60
     y_train = []
@@ -73,4 +76,4 @@ def scale(unscaledSet):
     return scaledSet
 
 
-train('./daten/FTSE_lerndaten.csv', 'Close', 'Close')
+train('./daten/2013-2019.05.02.csv', 'Close', 'Close')
