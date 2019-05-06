@@ -14,9 +14,9 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
 from keras.layers import Dropout
+from keras.models import model_from_json
 
-
-class Trainer (object):
+class Predictor (object):
     timestamp = 60
     layers = 3
     units = 50
@@ -25,23 +25,26 @@ class Trainer (object):
     epochs = 200
     batch_size = 32
 
-    def __init__(self,inputfile, x_columns_names, y_column_name):
-       self.dataset = self.getDataset(inputfile)
+    def __init__(self,offset, predict, x_columns_names, y_column_name, regressor):
+       self.offset = self.getDataset(offset)
+       self.predict = self.getDataset(predict)
+       self.regressor = self.loadPredictor(regressor)
+       self.dataset = pd.concat((offset[x_columns_names], predict[x_columns_names]), axis = 0)      
        self.input = self.initX(x_columns_names)
        self.dimension = len(x_columns_names)
        self.reference = self.initY(y_column_name)
        self.model = self.createModel()
+
        
 
        
-    def initX(self, x_column_names):
-       #x = self.dataset[x_column_names.copy()]
-       training_set = self.dataset[x_column_names.copy()].values
-       for i in range (0, len(x_column_names)):
-           training_set = np.append(training_set, self.scale(training_set[:,i]), axis = 1)
-       for i in range (0, len(x_column_names)):    
-           training_set = np.delete(training_set,0,axis = 1)
-       return training_set
+    def initX(self):
+       inputs = self.offset[len(self.offset) - len(self.predict) - self.timestamp:].values
+       for i in range (0, self.dimension):
+           inputs = np.append(inputs, self.scale(inputs[:,i]), axis = 1)
+       for i in range (0, len(self.dimension)):    
+           inputs = np.delete(inputs,0,axis = 1)
+       return inputs
    
     def initY(self, y_column_name):
         output_set = self.dataset[y_column_name].copy()
@@ -89,17 +92,12 @@ class Trainer (object):
         regressor.fit(self.model, self.reference, epochs = _epochs, batch_size = _batch_size)
         self.persistModel(regressor)
         
-    def persistModel(self, regressor):
-        regressor_json = regressor.to_json()
-        ts = time.time()
-        st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H-%M-%S')
-        with open("regressors/"+st+"_"+"1"+"_dax_regressor.json", "w") as json_file:
-            json_file.write(regressor_json)
-        regressor.save_weights("regressors/"+st+"_"+"1"+"_dax_regressor.h5")
+    def loadPredictor(self,name):
+        reg = 'regressors/'+name+ '.json'
+        weights = 'regressors/'+name+ '.h5'
+        with open(reg, 'r') as f:
+            regressor = model_from_json(f.read())
+        regressor.load_weights(weights)
+        return regressor
        
-tr = Trainer('./daten/offset_2013.csv',['Close'],'Close')
-tr.train(3, 60, 'adam', 'mean_squared_error', 200, 32)
-tr.train(3, 60, 'adam', 'mean_squared_logarithmic_error', 200, 32)
-tr.train(3, 60, 'rmsprop', 'mean_squared_error', 200, 32)
-tr.train(3, 60, 'rmsprop', 'mean_squared_logarithmic_error', 200, 32)
-
+pr = Predictor('./daten/offset_2013.csv','./daten/predict.csv',['Open'],'Close','2019-05-05_19-17-34__dim_dax_regressor')

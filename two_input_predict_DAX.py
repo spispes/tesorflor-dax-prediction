@@ -17,12 +17,12 @@ from prepare_input import getClose
 from loadRegresor import load_regressor
 
 
-dataset = prepareInput('./daten/offset.csv')
-dataset_predict = prepareInput('./daten/predict_long.csv')
+dataset = prepareInput('./daten/offset_2013.csv')
+dataset_predict = prepareInput('./daten/predict.csv')
 firstDataset_total = pd.concat((dataset['Open'], dataset_predict['Open']), axis = 0)
 secondDataset_total = pd.concat((dataset['Close'], dataset_predict['Close']), axis = 0)
 
-regressor_close = load_regressor('two_input_2019-04-29_22-13-58_dax_regressor')
+regressor_close = load_regressor('dax_regressor')
 
 """
 Not used for prediction just used to prepare scaler
