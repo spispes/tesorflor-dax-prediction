@@ -15,8 +15,8 @@ dataset_predict = prepareInput('./daten/predict.csv')
 
 dataset_total_close = pd.concat((dataset['Close'], dataset_predict['Close']), axis = 0)
 
-regressor_close = load_regressor('2019-05-06_09-27-57_1_dax_regressor')
 #regressor_close = load_regressor('dax_regressor')
+regressor_close = load_regressor('dax_regressor')
 
 sc = MinMaxScaler(feature_range = (0, 1), copy = False)
 training_set_open = getClose(dataset)

@@ -18,21 +18,13 @@ from keras.layers import Dropout
 
 class Trainer (object):
     timestamp = 60
-    layers = 3
-    units = 50
-    algorithm = 'adam' #rmsprop
-    error = 'mean_squared_error' #mean_squared_logarithmic_error
-    epochs = 200
-    batch_size = 32
 
     def __init__(self,inputfile, x_columns_names, y_column_name):
        self.dataset = self.getDataset(inputfile)
        self.input = self.initX(x_columns_names)
        self.dimension = len(x_columns_names)
        self.reference = self.initY(y_column_name)
-       self.model = self.createModel()
-       
-
+       self.model = self.createModel()      
        
     def initX(self, x_column_names):
        #x = self.dataset[x_column_names.copy()]
@@ -87,19 +79,30 @@ class Trainer (object):
         regressor.add(Dense(units = 1))
         regressor.compile(optimizer = _algorithm, loss = _error)
         regressor.fit(self.model, self.reference, epochs = _epochs, batch_size = _batch_size)
-        self.persistModel(regressor)
+        self.persistModel(regressor, _layers, _units, _algorithm, _error, _epochs, _batch_size)
         
-    def persistModel(self, regressor):
+    def persistModel(self, regressor, _layers, _units, _algorithm, _error, _epochs, _batch_size):
         regressor_json = regressor.to_json()
-        ts = time.time()
-        st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H-%M-%S')
-        with open("regressors/"+st+"_"+"1"+"_dax_regressor.json", "w") as json_file:
+        name = 'layers_'+str(_layers)
+        name = name + '_units_' +str(_units)
+        name = name + '_algorithm_' +str(_algorithm)
+        name = name + '_error_' +str(_error)
+        name = name + '_epochs_' +str(_epochs)
+        name = name + '_batchsize_' +str(_batch_size)
+
+        with open('regressors/'+name+'_dax_regressor.json', 'w') as json_file:
             json_file.write(regressor_json)
-        regressor.save_weights("regressors/"+st+"_"+"1"+"_dax_regressor.h5")
+        regressor.save_weights('regressors/'+name+'_dax_regressor.h5')
+
        
-tr = Trainer('./daten/offset_2013.csv',['Close'],'Close')
-tr.train(3, 60, 'adam', 'mean_squared_error', 200, 32)
-tr.train(3, 60, 'adam', 'mean_squared_logarithmic_error', 200, 32)
-tr.train(3, 60, 'rmsprop', 'mean_squared_error', 200, 32)
-tr.train(3, 60, 'rmsprop', 'mean_squared_logarithmic_error', 200, 32)
+tr = Trainer('./daten/offset_2013.csv',['Open','Close'],'Close')
+# tr.train(3, 60, 'adam', 'mean_squared_error', 200, 32) --> dax_down_regressor
+# tr.train(3, 60, 'adam', 'mean_squared_logarithmic_error', 200, 32) --> 2019-05-07_19-49-44_1_dax_regressor forget it
+# tr.train(3, 60, 'rmsprop', 'mean_squared_error', 200, 32) 2019-05-07_22-46-13_1_dax_regressor good
+# tr.train(3, 60, 'rmsprop', 'mean_squared_logarithmic_error', 200, 32) --> 2019-05-07_23-09-19_1_dax_regressor better
+step = 60
+for i in range(0, 1):
+    print('************** round '+str(step)+ '***********************')
+    tr.train(5, step, 'rmsprop', 'mean_squared_logarithmic_error', 200, 32)
+    step = step+5
 

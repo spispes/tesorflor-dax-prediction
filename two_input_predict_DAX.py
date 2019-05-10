@@ -22,7 +22,7 @@ dataset_predict = prepareInput('./daten/predict.csv')
 firstDataset_total = pd.concat((dataset['Open'], dataset_predict['Open']), axis = 0)
 secondDataset_total = pd.concat((dataset['Close'], dataset_predict['Close']), axis = 0)
 
-regressor_close = load_regressor('dax_regressor')
+regressor_close = load_regressor('layers_5_units_60_algorithm_rmsprop_error_mean_squared_logarithmic_error_epochs_200_batchsize_32_dax_regressor')
 
 """
 Not used for prediction just used to prepare scaler
