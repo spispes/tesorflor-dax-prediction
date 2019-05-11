@@ -7,25 +7,20 @@ Created on Wed May  1 19:06:21 2019
 
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import model_from_json
 
 class Predictor (object):
     timestamp = 60
-    layers = 3
-    units = 50
-    algorithm = 'adam' #rmsprop
-    error = 'mean_squared_error' #mean_squared_logarithmic_error
-    epochs = 200
-    batch_size = 32
 
     def __init__(self,offset, predict, x_columns_names, y_column_name):
-       self.sc = MinMaxScaler(feature_range = (0, 1)) 
        self.offset = self.getDataset(offset, x_columns_names)
        self.predictionset = self.getDataset(predict, x_columns_names)
        self.dataset = self.offset.append(self.predictionset)
+       self.sc = MinMaxScaler(feature_range = (0, 1))
+       self.sc.fit(self.dataset.values.reshape(-1,1))
        self.reference = self.initY(y_column_name)
-       self.sc.fit(self.reference.reshape(-1,1))
        self.dimension = len(x_columns_names)       
        self.input = self.initX()
        self.model = self.createModel()
@@ -34,14 +29,7 @@ class Predictor (object):
         regressor = self.loadPredictor(regressor)
         predicted_stock_price_close = regressor.predict(self.model)
         predicted_stock_price_close = self.unscale(predicted_stock_price_close)
-        print(predicted_stock_price_close)
-        return predicted_stock_price_close
-    """    
-         dataset 1603 (2013-01-02 -- 2019-05-08)
-         predictionset 88 (2019-01-02 -- 2019-05-08
-         timestamp 60
-         so we need the last 148 days from the concatenated dataset
-    """      
+        return predicted_stock_price_close    
         
     def initX(self):
        inputs = self.dataset[len(self.dataset) - len(self.predictionset) - self.timestamp:].values
@@ -52,12 +40,11 @@ class Predictor (object):
        return inputs
    
     def initY(self, y_column_name):
-        output_set = self.dataset[y_column_name].copy()
-        return output_set
+        outputset = self.dataset[y_column_name].copy()
+        return outputset
    
     def getDataset(self,file, x_columns_names):
         dataset = pd.read_csv(file, sep= ',', index_col = 0)
-        dataset.shape
         dataset = dataset.drop(['Adj Close', 'Volume'], axis=1)
         dataset = dataset.dropna()
         offset_data = []
@@ -89,6 +76,15 @@ class Predictor (object):
             regressor = model_from_json(f.read())
         regressor.load_weights(weights)
         return regressor
+    
+    def plot(self, predicted):
+        plt.plot(self.predictionset, color = 'red', label = 'Real DAX Stock Price')
+        plt.plot(predicted, color = 'blue', label = 'Predicted DAX Stock Close Price')
+        plt.grid(b=None, which='major', axis='both')
+        plt.title('DAX Stock Close Price Prediction')
+        plt.legend()
+        plt.show()
        
 pr = Predictor('./daten/offset_2013.csv','./daten/predict.csv',['Close'],'Close')
-result = pr.predict('dax_2_regressor')
+result = pr.predict('dim_1_layers_4_units_60_algorithm_adam_error_mean_squared_logarithmic_error_epochs_150_batchsize_32_dax_regressor')
+pr.plot(result)

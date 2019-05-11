@@ -7,8 +7,6 @@ Created on Wed May  1 19:06:21 2019
 
 import pandas as pd
 import numpy as np
-import datetime
-import time
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential
 from keras.layers import Dense
@@ -20,7 +18,10 @@ class Trainer (object):
     timestamp = 60
 
     def __init__(self,inputfile, x_columns_names, y_column_name):
+       self.sc = MinMaxScaler(feature_range = (0, 1)) 
        self.dataset = self.getDataset(inputfile)
+       scalingRange = self.dataset[y_column_name].copy()
+       self.sc.fit(self.dataset.values.reshape(-1,1))
        self.input = self.initX(x_columns_names)
        self.dimension = len(x_columns_names)
        self.reference = self.initY(y_column_name)
@@ -47,7 +48,6 @@ class Trainer (object):
    
     def getDataset(self,filename):
         dataset_in = pd.read_csv(filename, sep= ',', index_col = 0)
-        dataset_in.shape
         dataset_in = dataset_in.drop(['Adj Close', 'Volume'], axis=1)
         dataset_in = dataset_in.dropna()  
         return dataset_in
@@ -63,9 +63,8 @@ class Trainer (object):
         return X_1_train
     
     def scale(self, unscaled):
-        sc = MinMaxScaler(feature_range = (0, 1))
-        unscaled = sc.fit_transform(unscaled.reshape(-1,1))
-        return unscaled
+        scaled = self.sc.transform(unscaled.reshape(-1,1))
+        return scaled
     
     def train(self, _layers, _units, _algorithm, _error, _epochs, _batch_size):
         regressor = Sequential()
@@ -79,11 +78,12 @@ class Trainer (object):
         regressor.add(Dense(units = 1))
         regressor.compile(optimizer = _algorithm, loss = _error)
         regressor.fit(self.model, self.reference, epochs = _epochs, batch_size = _batch_size)
-        self.persistModel(regressor, _layers, _units, _algorithm, _error, _epochs, _batch_size)
+        self.persistModel(regressor, self.dimension, _layers, _units, _algorithm, _error, _epochs, _batch_size)
         
-    def persistModel(self, regressor, _layers, _units, _algorithm, _error, _epochs, _batch_size):
+    def persistModel(self, regressor,_dim, _layers, _units, _algorithm, _error, _epochs, _batch_size):
         regressor_json = regressor.to_json()
-        name = 'layers_'+str(_layers)
+        name = 'dim_'+str(_dim)
+        name = name + '_layers_'+str(_layers)
         name = name + '_units_' +str(_units)
         name = name + '_algorithm_' +str(_algorithm)
         name = name + '_error_' +str(_error)
@@ -95,14 +95,11 @@ class Trainer (object):
         regressor.save_weights('regressors/'+name+'_dax_regressor.h5')
 
        
-tr = Trainer('./daten/offset_2013.csv',['Open','Close'],'Close')
+tr = Trainer('./daten/offset_2013.csv',['Close'],'Close')
 # tr.train(3, 60, 'adam', 'mean_squared_error', 200, 32) --> dax_down_regressor
 # tr.train(3, 60, 'adam', 'mean_squared_logarithmic_error', 200, 32) --> 2019-05-07_19-49-44_1_dax_regressor forget it
 # tr.train(3, 60, 'rmsprop', 'mean_squared_error', 200, 32) 2019-05-07_22-46-13_1_dax_regressor good
 # tr.train(3, 60, 'rmsprop', 'mean_squared_logarithmic_error', 200, 32) --> 2019-05-07_23-09-19_1_dax_regressor better
-step = 60
-for i in range(0, 1):
-    print('************** round '+str(step)+ '***********************')
-    tr.train(5, step, 'rmsprop', 'mean_squared_logarithmic_error', 200, 32)
-    step = step+5
+for i in range(3,7):
+    tr.train(i, 60, 'adam', 'mean_squared_logarithmic_error', 150, 32)
 
