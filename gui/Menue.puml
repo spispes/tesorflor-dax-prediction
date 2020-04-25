@@ -1,0 +1,37 @@
+@startsalt
+{+
+{* File | Help
+ File | New Training |New Prediction| Open Training Configuration | |Open Prediction Configuration | - | Close }
+    {/ <b>Trainer | Training | Predictor | Prediction }
+    ..
+    {^"Select traning data"
+        Select File:    | ^<i>(file brovser) select *.csv file^
+        ..
+        Input Columns: | {SI
+                            field one       [x]
+                            field two       [x]
+                            field theree    [x]
+                            field Four      [x]
+                         }
+         ..
+         Output Column: | ^Select from list^
+    }
+    {^"Configure algorith"
+        Select Algoritm:    | ^<i>ADAM, rmsprop, ..^
+        ..
+        Define Layers:    | ^<i>integer [3,4,5,6]^
+        ..
+        Define Units:    | ^<i>integer^
+        ..
+        Define Error:    | ^<i>mean_squared_logarithmic_error, ..^
+        ..
+        Define Epochs:    | ^<i>integer [100 - 250 (a 50]^
+        ..
+        Define batch size:    | ^<i>integer [28 - 40]^
+    }
+    {^
+        [Run] |
+        [Save Configuration]
+    }
+}
+@endsalt
